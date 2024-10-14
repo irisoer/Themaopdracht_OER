@@ -1,0 +1,7 @@
+in terminal:
+    cd ..\flask_app #zorg dat je in de goede map zit
+
+    python app.py #run deze, als deze correct runt volgende stap 
+
+    Dan open je je browser en ga je naar: http://127.0.0.1:5000/
+
