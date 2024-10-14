@@ -1,0 +1,14 @@
+pandas
+numpy==1.26.4
+matplotlib
+scipy
+ipywidgets
+scikit-image
+seaborn
+pytz
+pvlib
+nbformat
+scikit-learn
+tensorflow
+pyyaml
+opencv-python
