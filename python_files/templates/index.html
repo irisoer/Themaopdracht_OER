@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Vraag & Antwoord</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 600px; /* Verbeterde breedte van de container */
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px); /* Breedte aanpassen om padding in rekening te brengen */
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Zorgt ervoor dat padding en border in de breedte worden meegerekend */
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #answer {
+            margin-top: 20px;
+        }
+
+        #response {
+            font-size: 18px;
+            color: #333;
+        }
+
+        #loading {
+            margin-top: 20px;
+            color: #007BFF;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #searching {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .hint {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .timer {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stel een vraag</h1>
+        <form id="questionForm">
+            <label for="question">Vraag:</label>
+            <input type="text" id="question" placeholder="Stel je vraag hier..." required>
+            <button type="submit">Verstuur</button>
+            <span id="loading" style="display: none;">🔄</span> <!-- Loading indicator -->
+        </form>
+        <div id="searching" class="searching" style="display: none;">Zoeken naar antwoord...</div>
+        <div id="timer" class="timer" style="display: none;"></div> <!-- Timer display -->
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('questionForm');
+        const loadingIndicator = document.getElementById('loading'); // Loading indicator
+        const searchingText = document.getElementById('searching'); // Searching text
+        const timerDisplay = document.getElementById('timer'); // Timer display
+
+        let timer; // Variable to hold the timer interval
+        let seconds = 0; // Variable to hold seconds
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Voorkom standaardformulierverzending
+            const question = document.getElementById('question').value;
+
+            // Wis het vorige antwoord
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = ''; // Wis het antwoord
+
+            // Toon de laadindicator en schakel de knop uit
+            loadingIndicator.style.display = 'inline'; // Maak de laadindicator zichtbaar
+            searchingText.style.display = 'block'; // Maak de zoektekst zichtbaar
+            timerDisplay.style.display = 'block'; // Maak de timer zichtbaar
+            const button = form.querySelector('button');
+            button.disabled = true; // Schakel de knop uit
+
+            // Start de timer
+            timer = setInterval(() => {
+                seconds++;
+                timerDisplay.innerText = `Zoeken duurt al: ${seconds} seconden`;
+            }, 1000);
+
+            // Stuur vraag naar de server
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'question': question
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                responseDiv.innerHTML = `
+                    <p><strong>Jouw vraag:</strong> ${question}</p>
+                    <p><strong>Antwoord:</strong><br>${data.inference}</p>
+                `;
+
+                // Geef een hint als het antwoord niet goed genoeg is
+                if (!data.inference || data.inference.toLowerCase().includes("geen resultaten gevonden")) {
+                    responseDiv.innerHTML += `<p class="hint">Tip: Probeer je vraag specifieker te maken.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `<p style="color: red;">Er is een fout opgetreden. Probeer het opnieuw.</p>`;
+            })
+            .finally(() => {
+                // Verberg de laadindicator en schakel de knop weer in
+                loadingIndicator.style.display = 'none'; // Verberg de laadindicator
+                searchingText.style.display = 'none'; // Verberg de zoektekst
+                button.disabled = false; // Schakel de knop weer in
+                document.getElementById('question').value = ''; // Maak het invoerveld leeg
+
+                // Stop de timer
+                clearInterval(timer);
+                seconds = 0; // Reset de seconden
+                timerDisplay.style.display = 'none'; // Verberg de timer
+            });
+        });
+    </script>
+</body>
+</html>
