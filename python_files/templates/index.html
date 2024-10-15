@@ -22,7 +22,7 @@
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 600px; /* Verbeterde breedte van de container */
+            width: 600px; 
         }
 
         h1 {
@@ -36,12 +36,12 @@
         }
 
         input[type="text"] {
-            width: calc(100% - 20px); /* Breedte aanpassen om padding in rekening te brengen */
+            width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box; /* Zorgt ervoor dat padding en border in de breedte worden meegerekend */
+            box-sizing: border-box; 
         }
 
         button {
@@ -98,10 +98,10 @@
             <label for="question">Vraag:</label>
             <input type="text" id="question" placeholder="Stel je vraag hier..." required>
             <button type="submit">Verstuur</button>
-            <span id="loading" style="display: none;">🔄</span> <!-- Loading indicator -->
+            <span id="loading" style="display: none;">🔄</span> 
         </form>
         <div id="searching" class="searching" style="display: none;">Zoeken naar antwoord...</div>
-        <div id="timer" class="timer" style="display: none;"></div> <!-- Timer display -->
+        <div id="timer" class="timer" style="display: none;"></div> 
         <div id="response"></div>
     </div>
 
@@ -151,11 +151,6 @@
                     <p><strong>Jouw vraag:</strong> ${question}</p>
                     <p><strong>Antwoord:</strong><br>${data.inference}</p>
                 `;
-
-                // Geef een hint als het antwoord niet goed genoeg is
-                if (!data.inference || data.inference.toLowerCase().includes("geen resultaten gevonden")) {
-                    responseDiv.innerHTML += `<p class="hint">Tip: Probeer je vraag specifieker te maken.</p>`;
-                }
             })
             .catch(error => {
                 console.error('Error:', error);
