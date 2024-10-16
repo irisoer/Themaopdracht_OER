@@ -3,30 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Vraag & Antwoord</title>
+    <title>OER-GEITje Chatbot</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9f0f5;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            flex-direction: column;
+            min-height: 100vh; /* Zorgt ervoor dat de body minstens de volledige hoogte van het scherm bedekt */
         }
 
         .container {
             background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 600px; 
+            width: 1000px; /* Aangepaste breedte van de container */
+            margin: auto; /* Zorgt dat het formulier in het midden staat */
+            display: flex;
+            flex-direction: column;
+            height: 80vh; /* Maak de container hoog genoeg om ruimte voor de chat te bieden */
         }
 
         h1 {
+            color: #0056b3; /* Titelkleur */
+            margin-bottom: 10px;
+        }
+
+        h2 {
             color: #333;
+            font-weight: normal;
+            margin-bottom: 20px;
+        }
+
+        .chat {
+            flex: 1; /* Zorgt dat de chatruimte groeit */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Zorgt voor een scrollbare chat */
+            margin-bottom: 20px; /* Ruimte onder de chat */
+            border: 1px solid #ccc; /* Rand om de chat */
+            border-radius: 6px; /* Afgeronde hoeken */
+            padding: 10px; /* Ruimte binnen de chat */
+            background-color: #f0f4f8; /* Lichtgrijsblauwe achtergrond */
+        }
+
+        .user-message {
+            align-self: flex-end; /* Plaats gebruikersbericht aan de rechterkant */
+            background-color: #28a745; /* Groene achtergrond voor gebruikersberichten */
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 5px 0;
+            max-width: 60%; /* Max breedte van gebruikersberichten */
+            word-wrap: break-word; /* Zorgt dat lange woorden niet uit de chat lopen */
+            text-align: right; /* Tekst rechts uitlijnen voor gebruikersberichten */
+        }
+
+        .bot-message {
+            align-self: flex-start; /* Plaats botbericht aan de linkerkant */
+            background-color: #0056b3; /* Nog doffere blauwe achtergrondkleur */
+            color: white; /* Witte tekst voor botberichten */
+            padding: 10px;
+            border-radius: 6px;
+            margin: 5px 0;
+            max-width: 60%; /* Max breedte van botberichten */
+            word-wrap: break-word; /* Zorgt dat lange woorden niet uit de chat lopen */
+            text-align: left; /* Tekst links uitlijnen voor botberichten */
+        }
+
+        .timer {
+            margin: 10px 0; 
+            font-size: 14px; 
+            color: #666; 
         }
 
         label {
@@ -36,104 +92,91 @@
         }
 
         input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 10px;
+            width: 100%; /* Maakt het invoerveld net zo breed als de container */
+            padding: 12px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; 
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #answer {
-            margin-top: 20px;
-        }
-
-        #response {
-            font-size: 18px;
-            color: #333;
-        }
-
-        #loading {
-            margin-top: 20px;
-            color: #007BFF;
-            font-weight: bold;
+            border-radius: 6px;
             font-size: 16px;
         }
 
-        #searching {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #555;
+        button {
+            padding: 12px 25px;
+            background-color: #0056b3; /* Overeenkomende kleur met titel */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
         }
 
-        .hint {
-            color: orange;
-            font-weight: bold;
+        button:hover {
+            background-color: #004494; /* Donkerder blauw voor hover-effect */
         }
 
-        .timer {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #007BFF;
+        footer {
+            margin-top: auto; /* Zorgt dat de footer altijd onderaan blijft */
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            background-color: #f4f4f4;
+            width: 100%;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Stel een vraag</h1>
+        <h1>OER-GEITje Chatbot</h1>
+        <h2>Stel je vragen over het onderwijs en examenreglement</h2>
+
+        <div class="chat" id="chat"></div> <!-- Container voor de chat -->
+
+        <div class="timer" id="timer" style="display: none;"></div> <!-- Timer voor de laadtijd -->
+
         <form id="questionForm">
-            <label for="question">Vraag:</label>
+            <label for="question">Vraag:</label> <!-- Vraag label -->
             <input type="text" id="question" placeholder="Stel je vraag hier..." required>
             <button type="submit">Verstuur</button>
-            <span id="loading" style="display: none;">🔄</span> 
         </form>
-        <div id="searching" class="searching" style="display: none;">Zoeken naar antwoord...</div>
-        <div id="timer" class="timer" style="display: none;"></div> 
-        <div id="response"></div>
     </div>
+
+    <footer>
+        <p>OER-GEITje Chatbot © 2024</p>
+    </footer>
 
     <script>
         const form = document.getElementById('questionForm');
-        const loadingIndicator = document.getElementById('loading'); // Loading indicator
-        const searchingText = document.getElementById('searching'); // Searching text
+        const chat = document.getElementById('chat'); // Chat container
         const timerDisplay = document.getElementById('timer'); // Timer display
-
-        let timer; // Variable to hold the timer interval
-        let seconds = 0; // Variable to hold seconds
 
         form.addEventListener('submit', function(event) {
             event.preventDefault(); // Voorkom standaardformulierverzending
             const question = document.getElementById('question').value;
 
-            // Wis het vorige antwoord
-            const responseDiv = document.getElementById('response');
-            responseDiv.innerHTML = ''; // Wis het antwoord
+            // Voeg het gebruikersbericht toe aan de chat
+            const userMessage = document.createElement('div');
+            userMessage.className = 'user-message';
+            userMessage.innerHTML = `<strong>Vraag</strong><br> ${question}`; // Voeg "Vraag:" toe boven de vraag
+            chat.appendChild(userMessage);
+            
+            // Scroll naar beneden na het toevoegen van het gebruikersbericht
+            chat.scrollTop = chat.scrollHeight;
 
-            // Toon de laadindicator en schakel de knop uit
-            loadingIndicator.style.display = 'inline'; // Maak de laadindicator zichtbaar
-            searchingText.style.display = 'block'; // Maak de zoektekst zichtbaar
+            // Wis het invoerveld
+            document.getElementById('question').value = '';
+
+            // Timer voor laadtijd
             timerDisplay.style.display = 'block'; // Maak de timer zichtbaar
-            const button = form.querySelector('button');
-            button.disabled = true; // Schakel de knop uit
+            let seconds = 0; // Timer starten
+            timerDisplay.innerText = `Even nadenken... ${seconds} seconden aan het denken`; 
 
-            // Start de timer
-            timer = setInterval(() => {
+            // Timer functie instellen
+            const timerInterval = setInterval(() => {
                 seconds++;
-                timerDisplay.innerText = `Zoeken duurt al: ${seconds} seconden`;
-            }, 1000);
+                timerDisplay.innerText = `Even nadenken... ${seconds} seconden aan het denken`; 
+            }, 1000); // Elke seconde
 
             // Stuur vraag naar de server
             fetch('/ask', {
@@ -147,26 +190,42 @@
             })
             .then(response => response.json())
             .then(data => {
-                responseDiv.innerHTML = `
-                    <p><strong>Jouw vraag:</strong> ${question}</p>
-                    <p><strong>Antwoord:</strong><br>${data.inference}</p>
-                `;
+                // Voeg het botantwoord toe aan de chat
+                const botMessage = document.createElement('div');
+                botMessage.className = 'bot-message';
+
+                // Maak de tekst dikgedrukt waar dat nodig is
+                let responseText = data.inference.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Verwijder 'output:' als het ergens in de tekst verschijnt
+                responseText = responseText.replace(/output:\s*/, ''); // Verwijder 'output:' met optionele spaties
+                
+                // Voeg een <br> tag toe vóór elk opsommingsteken (bijvoorbeeld: "1. ", "2. ", ... )
+                responseText = responseText.replace(/(\d+\.\s)/g, '<br>$1'); // Voor een nummer met punt, voeg extra regel voor
+                responseText = responseText.replace(/([•-]\s)/g, '<br>$1'); // Voor opsommingstekens zoals bullet points of streepjes
+
+                botMessage.innerHTML = `<strong>Antwoord</strong><br>${responseText}`;
+                chat.appendChild(botMessage);
+                
+                // Scroll naar beneden na het toevoegen van het botbericht
+                chat.scrollTop = chat.scrollHeight;
             })
             .catch(error => {
                 console.error('Error:', error);
-                responseDiv.innerHTML = `<p style="color: red;">Er is een fout opgetreden. Probeer het opnieuw.</p>`;
+                const botMessage = document.createElement('div');
+                botMessage.className = 'bot-message';
+                botMessage.innerHTML = `<strong>Antwoord:</strong><br><span style="color: red;">Er is een fout opgetreden. Probeer het opnieuw.</span>`;
+                chat.appendChild(botMessage);
+                
+                // Scroll naar beneden na het toevoegen van het botbericht
+                chat.scrollTop = chat.scrollHeight;
             })
             .finally(() => {
-                // Verberg de laadindicator en schakel de knop weer in
-                loadingIndicator.style.display = 'none'; // Verberg de laadindicator
-                searchingText.style.display = 'none'; // Verberg de zoektekst
-                button.disabled = false; // Schakel de knop weer in
-                document.getElementById('question').value = ''; // Maak het invoerveld leeg
-
                 // Stop de timer
-                clearInterval(timer);
-                seconds = 0; // Reset de seconden
-                timerDisplay.style.display = 'none'; // Verberg de timer
+                clearInterval(timerInterval); // Stop de timer
+
+                // Na de reactie, verberg de timer
+                timerDisplay.style.display = 'none'; 
             });
         });
     </script>
