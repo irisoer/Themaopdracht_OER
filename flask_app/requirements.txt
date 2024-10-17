@@ -1,3 +1,3 @@
-Flask==2.2.2
-llama-cpp==0.1.0  # Vervang door de juiste versie, als nodig
-chromadb==0.1.0  # Vervang door de juiste versie, als nodig
+Flask
+llama-cpp-python
+chromadb
