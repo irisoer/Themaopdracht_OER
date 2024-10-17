@@ -202,7 +202,7 @@
                 
                 // Voeg een <br> tag toe vóór elk opsommingsteken (bijvoorbeeld: "1. ", "2. ", ... )
                 responseText = responseText.replace(/(\d+\.\s)/g, '<br>$1'); // Voor een nummer met punt, voeg extra regel voor
-                responseText = responseText.replace(/([•-]\s)/g, '<br>$1'); // Voor opsommingstekens zoals bullet points of streepjes
+                responseText = responseText.replace(/([•]\s)/g, '<br>$1'); // Voor opsommingstekens zoals bullet points of streepjes
 
                 botMessage.innerHTML = `<strong>Antwoord</strong><br>${responseText}`;
                 chat.appendChild(botMessage);
