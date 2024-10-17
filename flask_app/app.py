@@ -18,7 +18,7 @@ client = chromadb.Client()
 collection = client.get_or_create_collection("information")
 
 # Inlezen van het OER-JSON-bestand en voorbereiden van de data
-with open('../Notebook final/data/Opleidingsdeel OER HBO-ICT Zwolle 2024-2025_JSON.json', 'r', encoding='utf-8') as json_file:
+with open('data/OER.json', 'r', encoding='utf-8') as json_file:
     data = json.load(json_file) 
     documents = [item['text'] for item in data]  # Lijst van tekst uit de JSON
     metadata = [{'page': item['page']} for item in data]  # Lijst van metadata (paginanummers)
